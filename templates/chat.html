@@ -1,150 +1,41 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gemini AI Chatbot</title>
+  <title>AI Chatbot</title>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f3f4f6;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
-
-    header {
-      background-color: #4f46e5;
-      color: white;
-      padding: 1rem;
-      text-align: center;
-      font-size: 1.5rem;
-    }
-
-    #chat-container {
-      flex: 1;
-      padding: 1rem;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .message {
-      max-width: 70%;
-      padding: 0.75rem 1rem;
-      border-radius: 1rem;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-
-    .user {
-      align-self: flex-end;
-      background-color: #6366f1;
-      color: white;
-    }
-
-    .bot {
-      align-self: flex-start;
-      background-color: #e5e7eb;
-      color: #111827;
-    }
-
-    #input-form {
-      display: flex;
-      padding: 1rem;
-      background-color: white;
-      border-top: 1px solid #d1d5db;
-    }
-
-    #user-input {
-      flex: 1;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-    }
-
-    button {
-      margin-left: 0.75rem;
-      padding: 0.75rem 1.25rem;
-      background-color: #4f46e5;
-      color: white;
-      border: none;
-      border-radius: 0.5rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #4338ca;
-    }
-
-    #typing-indicator {
-      font-size: 0.9rem;
-      color: #6b7280;
-      font-style: italic;
-      margin-top: -0.5rem;
-      margin-left: 0.5rem;
-    }
+    body { font-family: Arial; background: #f4f4f4; padding: 20px; }
+    #chatbox { width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 10px; }
+    .message { margin: 10px 0; }
+    .user { font-weight: bold; color: #007bff; }
+    .bot { font-weight: bold; color: #28a745; }
   </style>
 </head>
 <body>
-  <header>AI Chatbot</header>
-  <main id="chat-container">
-    <!-- Chat messages will appear here -->
-  </main>
-
-  <form id="input-form">
-    <input type="text" id="user-input" autocomplete="off" placeholder="Ask something..." required />
-    <button type="submit">Send</button>
-  </form>
+  <div id="chatbox">
+    <h2>AI Chatbot</h2>
+    <div id="chatlog"></div>
+    <input type="text" id="userInput" placeholder="Type a message..." style="width:80%">
+    <button onclick="sendMessage()">Send</button>
+  </div>
 
   <script>
-    const form = document.getElementById("input-form");
-    const input = document.getElementById("user-input");
-    const chat = document.getElementById("chat-container");
-
-    function appendMessage(content, className) {
-      const msg = document.createElement("div");
-      msg.className = `message ${className}`;
-      msg.textContent = content;
-      chat.appendChild(msg);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function showTyping() {
-      const typing = document.createElement("div");
-      typing.id = "typing-indicator";
-      typing.textContent = "Typing...";
-      chat.appendChild(typing);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function removeTyping() {
-      const typing = document.getElementById("typing-indicator");
-      if (typing) typing.remove();
-    }
-
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const userText = input.value.trim();
-      if (!userText) return;
-
-      appendMessage(userText, "user");
+    async function sendMessage() {
+      const input = document.getElementById("userInput");
+      const chatlog = document.getElementById("chatlog");
+      const userText = input.value;
       input.value = "";
-      showTyping();
 
-      const response = await fetch("/chat", {
+      chatlog.innerHTML += `<div class="message user">You: ${userText}</div>`;
+
+      const res = await fetch("/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userText }),
       });
 
-      const data = await response.json();
-      removeTyping();
-      appendMessage(data.reply, "bot");
-    });
+      const data = await res.json();
+      chatlog.innerHTML += `<div class="message bot">Chatbot: ${data.reply}</div>`;
+    }
   </script>
 </body>
 </html>
